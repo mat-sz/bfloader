@@ -9,3 +9,8 @@ Boot sector Brainfuck interpreter, fits in 512 bytes.
 ```
 make && qemu-system-x86_64 bfloader.bin
 ```
+
+## Usage
+
+After running, type in your Brainfuck program using your keyboard and press Enter to execute it.
+The output will be shown in the lower half of your screen.
