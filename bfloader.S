@@ -27,8 +27,13 @@ CHAR_LOOP_END = 0x5D      # ]
 .global init
 
 init:
-    # 80x25
+    # Set text mode, 80x25.
     mov $0x0002, %ax
+    int $0x10
+
+    # Set cursor shape. (Insert style)
+    mov $0x01, %ah
+    mov $0x000f, %cx
     int $0x10
 
     jmp keyboard
@@ -55,6 +60,11 @@ keyboard:
     jmp keyboard
 
 execute:
+    # Set cursor shape. (Default)
+    mov $0x01, %ah
+    mov $0x0001, %cx
+    int $0x10
+
     # Initialize interpreter.
     movw $BF_INITIAL_POINTER, (MEMORY_CURRENT_POINTER)
     movw $BF_INITIAL_OUT, (MEMORY_OUT_CHAR)
@@ -120,7 +130,6 @@ cmd_in:
     # Save character.
     mov (MEMORY_CURRENT_POINTER), %bx
     mov %al, (%bx)
-
     jmp next
 
 cmd_out:
