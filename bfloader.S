@@ -15,6 +15,7 @@ MEMORY_FLAG_DEBUG = MEMORY_OFFSET + 20
 
 KEY_EXECUTE = 0x3F00   # F5
 KEY_DEBUG = 0x6200     # Ctrl+F5
+KEY_TERMINATE = 0x2E03 # Ctrl+C
 
 CHAR_POINTER_RIGHT = 0x3E # >
 CHAR_POINTER_LEFT = 0x3C  # <
@@ -33,12 +34,33 @@ init:
     mov $0x0002, %ax
     int $0x10
 
+restart:
+    mov $0xF000, %bx
+
+clear_memory:
+    movb $0x00, (%bx)
+    inc %bx
+    cmp $0xF0FF, %bx
+    jne clear_memory
+
+restart_cont:
     # Set cursor shape. (Insert style)
     mov $0x01, %ah
     mov $0x000f, %cx
     int $0x10
 
+    # Set cursor position.
+    mov $0x02, %ah
+    mov $0x00, %bh
+    mov $0x0000, %dx
+    int $0x10
+
+    # Initialize
     movb $0x00, (MEMORY_FLAG_DEBUG)
+    movw $BF_INITIAL_POINTER, (MEMORY_CURRENT_POINTER)
+    movw $BF_INITIAL_OUT, (MEMORY_OUT_CHAR)
+    movw $0x0000, (MEMORY_CURRENT_CHAR)
+    mov %sp, (MEMORY_STACK)
 
     jmp keyboard
 
@@ -84,11 +106,22 @@ execute:
 
 loop:
     cmpb $0x00, (MEMORY_FLAG_DEBUG)
-    je step
+    jne loop_wait
 
+    # Get pressed key.
+    mov $0x01, %ah
+    int $0x16
+    jz step
+
+loop_wait:
     # Wait for pressed key.
     mov $0x00, %ah
+
+loop_should_terminate:
     int $0x16
+    
+    cmp $KEY_TERMINATE, %ax
+    je restart
 
 step:
     # Set cursor position.
@@ -233,6 +266,7 @@ next_row:
     jmp loop
 
 end:
+    jmp loop_wait
 
 .fill 510-(.-init), 1, 0
 .word 0xaa55
