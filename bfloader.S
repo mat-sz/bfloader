@@ -4,11 +4,11 @@ BF_INITIAL_POINTER = 0xF000
 BF_INITIAL_OUT = 0x1500
 
 MAX_COL = 80
+MAX_CHAR = 0x1379
 
 MEMORY_OFFSET = 0xFFD0
 MEMORY_CURRENT_POINTER = MEMORY_OFFSET
 MEMORY_CURRENT_CHAR = MEMORY_OFFSET + 4
-MEMORY_LAST_CHAR = MEMORY_OFFSET + 8
 MEMORY_OUT_CHAR = MEMORY_OFFSET + 12
 MEMORY_STACK = MEMORY_OFFSET + 16
 
@@ -70,12 +70,6 @@ execute:
     movw $BF_INITIAL_OUT, (MEMORY_OUT_CHAR)
     movw $0x0000, (MEMORY_CURRENT_CHAR)
     mov %sp, (MEMORY_STACK)
-
-    # Read cursor position.
-    mov $0x03, %ah
-    int $0x16
-
-    mov %dx, (MEMORY_LAST_CHAR)
 
 loop:
     # Set cursor position.
@@ -205,7 +199,7 @@ next:
     mov (MEMORY_CURRENT_CHAR), %ax
 
     # Check if it's past the last character (if it is, end program).
-    cmpw (MEMORY_LAST_CHAR), %ax
+    cmpw $MAX_CHAR, %ax
     jg end
 
     # Check if it's last column, if yes, go to next row.
