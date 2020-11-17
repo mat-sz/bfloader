@@ -12,7 +12,7 @@ MEMORY_CURRENT_CHAR = MEMORY_OFFSET + 4
 MEMORY_OUT_CHAR = MEMORY_OFFSET + 12
 MEMORY_STACK = MEMORY_OFFSET + 16
 
-KEY_ENTER = 0x1C
+KEY_EXECUTE = 0x3F00   # F5
 
 CHAR_POINTER_RIGHT = 0x3E # >
 CHAR_POINTER_LEFT = 0x3C  # <
@@ -48,8 +48,8 @@ keyboard:
     mov $0x00, %ah
     int $0x16
 
-    # Start executing if Enter is pressed.
-    cmp $KEY_ENTER, %ah
+    # Start executing if KEY_EXECUTE is pressed.
+    cmp $KEY_EXECUTE, %ax
     je execute
 
     # Print last character.
