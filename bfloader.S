@@ -11,8 +11,10 @@ MEMORY_CURRENT_POINTER = MEMORY_OFFSET
 MEMORY_CURRENT_CHAR = MEMORY_OFFSET + 4
 MEMORY_OUT_CHAR = MEMORY_OFFSET + 12
 MEMORY_STACK = MEMORY_OFFSET + 16
+MEMORY_FLAG_DEBUG = MEMORY_OFFSET + 20
 
 KEY_EXECUTE = 0x3F00   # F5
+KEY_DEBUG = 0x6200     # Ctrl+F5
 
 CHAR_POINTER_RIGHT = 0x3E # >
 CHAR_POINTER_LEFT = 0x3C  # <
@@ -36,6 +38,8 @@ init:
     mov $0x000f, %cx
     int $0x10
 
+    movb $0x00, (MEMORY_FLAG_DEBUG)
+
     jmp keyboard
 
 keyboard:
@@ -52,12 +56,19 @@ keyboard:
     cmp $KEY_EXECUTE, %ax
     je execute
 
+    # Start debugging if KEY_DEBUG is pressed.
+    cmp $KEY_DEBUG, %ax
+    je debug
+
     # Print last character.
     mov $0x0e, %ah
     int $0x10
 
     # Get more keys.
     jmp keyboard
+
+debug:
+    movb $0x01, (MEMORY_FLAG_DEBUG)
 
 execute:
     # Set cursor shape. (Default)
@@ -72,6 +83,14 @@ execute:
     mov %sp, (MEMORY_STACK)
 
 loop:
+    cmpb $0x00, (MEMORY_FLAG_DEBUG)
+    je step
+
+    # Wait for pressed key.
+    mov $0x00, %ah
+    int $0x16
+
+step:
     # Set cursor position.
     mov $0x02, %ah
     mov $0x00, %bh
