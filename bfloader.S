@@ -122,6 +122,10 @@ loop_should_terminate:
     
     cmp $KEY_TERMINATE, %ax
     je restart
+    
+    cmp $KEY_EXECUTE, %ax
+    jne step
+    movb $0x00, (MEMORY_FLAG_DEBUG)
 
 step:
     # Set cursor position.
