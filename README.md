@@ -12,7 +12,7 @@ make && qemu-system-x86_64 bfloader.bin
 
 ## Usage
 
-After running, type in your Brainfuck program using your keyboard and press Enter to execute it.
+After running, type in your Brainfuck program using your keyboard and press <kbd>F5</kbd> to execute it (or <kbd>Ctrl</kbd> + <kbd>F5</kbd> to start step by step execution).
 The output will be shown in the lower half of your screen.
 
-Currently there is no way to stop the execution without rebooting the computer/virtual machine.
+To stop the execution hold <kbd>Ctrl</kbd> + <kbd>C</kbd>. While debugging press <kbd>F5</kbd> to continue the program from the current step until the end.
