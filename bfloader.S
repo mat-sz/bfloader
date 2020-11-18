@@ -33,6 +33,8 @@ CHAR_IN = 0x2C            # ,
 CHAR_LOOP_START = 0x5B    # [
 CHAR_LOOP_END = 0x5D      # ]
 
+CHAR_BORDER = 0xCD
+
 .code16
 .global init
 
@@ -60,6 +62,12 @@ restart_cont:
     mov $0x02, %ah
     mov $0x00, %bh
     mov $BF_ABOUT, %dx
+    int $0x10
+
+    # Print about background.
+    mov $0x0900, %ax
+    mov $0x001F, %bx
+    mov $0x0050, %cx
     int $0x10
 
     mov $about, %si
