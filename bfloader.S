@@ -1,10 +1,11 @@
 # bfloader - Brainfuck made to fit in 512 bytes.
 
 BF_INITIAL_POINTER = 0xF000
-BF_INITIAL_OUT = 0x1500
+BF_INITIAL_OUT = 0x0E00
 
-MAX_COL = 80
-MAX_CHAR = 0x1379
+MAX_ROW = 0x0D
+MAX_COL = 0x4F
+MAX_CHAR = 0x0D4F
 
 MEMORY_OFFSET = 0xFFD0
 MEMORY_CURRENT_POINTER = MEMORY_OFFSET
@@ -16,6 +17,11 @@ MEMORY_FLAG_DEBUG = MEMORY_OFFSET + 20
 KEY_EXECUTE = 0x3F00   # F5
 KEY_DEBUG = 0x6200     # Ctrl+F5
 KEY_TERMINATE = 0x2E03 # Ctrl+C
+
+KEY_UP = 0x48
+KEY_DOWN = 0x50
+KEY_LEFT = 0x4B
+KEY_RIGHT = 0x4D
 
 CHAR_POINTER_RIGHT = 0x3E # >
 CHAR_POINTER_LEFT = 0x3C  # <
@@ -82,11 +88,67 @@ keyboard:
     cmp $KEY_DEBUG, %ax
     je debug
 
+    # Move cursor
+    cmp $KEY_UP, %ah
+    je move_up
+
+    # Move cursor
+    cmp $KEY_DOWN, %ah
+    je move_down
+
+    # Move cursor
+    cmp $KEY_LEFT, %ah
+    je move_left
+
+    # Move cursor
+    cmp $KEY_RIGHT, %ah
+    je move_right
+
     # Print last character.
     mov $0x0e, %ah
     int $0x10
 
     # Get more keys.
+    jmp keyboard
+
+move_prepare:
+    # Read cursor position.
+    mov $0x03, %ah
+    int $0x16
+    ret
+
+move_up:
+    call move_prepare
+    cmp $0x00, %dh
+    je keyboard
+    dec %dh
+    jmp move_finish
+
+move_left:
+    call move_prepare
+    cmp $0x00, %dl
+    je keyboard
+    dec %dl
+    jmp move_finish
+
+move_right:
+    call move_prepare
+    cmp $MAX_COL, %dl
+    je keyboard
+    inc %dl
+    jmp move_finish
+
+move_down:
+    call move_prepare
+    cmp $MAX_ROW, %dh
+    je keyboard
+    inc %dh
+
+move_finish:
+    # Set cursor position.
+    mov $0x02, %ah
+    mov $0x00, %bh
+    int $0x10
     jmp keyboard
 
 debug:
