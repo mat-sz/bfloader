@@ -2,6 +2,7 @@
 
 BF_INITIAL_POINTER = 0xF000
 BF_INITIAL_OUT = 0x0E00
+BF_ABOUT = 0x1800
 
 MAX_ROW = 0x0D
 MAX_COL = 0x4F
@@ -55,6 +56,24 @@ restart_cont:
     mov $0x000f, %cx
     int $0x10
 
+    # Set cursor position.
+    mov $0x02, %ah
+    mov $0x00, %bh
+    mov $BF_ABOUT, %dx
+    int $0x10
+
+    mov $about, %si
+    mov $0x0e, %ah
+
+print_about:
+    lodsb
+    cmp $0x00, %al
+    je restart_finish
+
+    int $0x10
+    jmp print_about
+
+restart_finish:
     # Set cursor position.
     mov $0x02, %ah
     mov $0x00, %bh
@@ -333,6 +352,8 @@ next_row:
 
 end:
     jmp loop_wait
+
+about: .asciz "bfloader   F5 Run   Ctrl+F5 Debug"
 
 .fill 510-(.-init), 1, 0
 .word 0xaa55

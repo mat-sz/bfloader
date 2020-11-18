@@ -6,4 +6,4 @@ clean:
 
 all: clean
 	as -o bfloader.o bfloader.S
-	ld -o bfloader.bin --oformat binary -e init bfloader.o
+	ld -o bfloader.bin --oformat binary -e init -Ttext 0x7c00 bfloader.o
