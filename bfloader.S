@@ -1,7 +1,8 @@
 # bfloader - Brainfuck made to fit in 512 bytes.
 
 BF_INITIAL_POINTER = 0xF000
-BF_INITIAL_OUT = 0x0E00
+BF_SEPARATOR = 0x0E00
+BF_INITIAL_OUT = 0x0F00
 BF_ABOUT = 0x1800
 
 MAX_ROW = 0x0D
@@ -56,6 +57,18 @@ restart_cont:
     # Set cursor shape. (Insert style)
     mov $0x01, %ah
     mov $0x000f, %cx
+    int $0x10
+
+    # Set cursor position.
+    mov $0x02, %ah
+    mov $0x00, %bh
+    mov $BF_SEPARATOR, %dx
+    int $0x10
+
+    # Print output separator.
+    mov $0x09CD, %ax
+    mov $0x000F, %bx
+    mov $0x0050, %cx
     int $0x10
 
     # Set cursor position.
