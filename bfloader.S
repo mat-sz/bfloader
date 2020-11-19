@@ -60,10 +60,8 @@ restart_cont:
     int $0x10
 
     # Set cursor position.
-    mov $0x02, %ah
-    mov $0x00, %bh
     mov $BF_SEPARATOR, %dx
-    int $0x10
+    call set_cursor_pos
 
     # Print output separator.
     mov $0x09CD, %ax
@@ -72,10 +70,8 @@ restart_cont:
     int $0x10
 
     # Set cursor position.
-    mov $0x02, %ah
-    mov $0x00, %bh
     mov $BF_ABOUT, %dx
-    int $0x10
+    call set_cursor_pos
 
     # Print about background.
     mov $0x0900, %ax
@@ -96,10 +92,8 @@ print_about:
 
 restart_finish:
     # Set cursor position.
-    mov $0x02, %ah
-    mov $0x00, %bh
-    mov $0x0000, %dx
-    int $0x10
+    xor %dx, %dx
+    call set_cursor_pos
 
     # Initialize
     movb $0x00, (MEMORY_FLAG_DEBUG)
@@ -117,7 +111,7 @@ keyboard:
 
     # Loop again if no key is pressed.
     jz keyboard
-    mov $0x00, %ah
+    xor %ah, %ah
     int $0x16
 
     # Start executing if KEY_EXECUTE is pressed.
@@ -186,9 +180,7 @@ move_down:
 
 move_finish:
     # Set cursor position.
-    mov $0x02, %ah
-    mov $0x00, %bh
-    int $0x10
+    call set_cursor_pos
     jmp keyboard
 
 debug:
@@ -199,12 +191,6 @@ execute:
     mov $0x01, %ah
     mov $0x0001, %cx
     int $0x10
-
-    # Initialize interpreter.
-    movw $BF_INITIAL_POINTER, (MEMORY_CURRENT_POINTER)
-    movw $BF_INITIAL_OUT, (MEMORY_OUT_CHAR)
-    movw $0x0000, (MEMORY_CURRENT_CHAR)
-    mov %sp, (MEMORY_STACK)
 
 loop:
     cmpb $0x00, (MEMORY_FLAG_DEBUG)
@@ -217,7 +203,7 @@ loop:
 
 loop_wait:
     # Wait for pressed key.
-    mov $0x00, %ah
+    xor %ah, %ah
 
 loop_should_terminate:
     int $0x16
@@ -231,10 +217,8 @@ loop_should_terminate:
 
 step:
     # Set cursor position.
-    mov $0x02, %ah
-    mov $0x00, %bh
     mov (MEMORY_CURRENT_CHAR), %dx
-    int $0x10
+    call set_cursor_pos
 
     # Read character. (to %al)
     mov $0x08, %ah
@@ -276,7 +260,7 @@ cmd_in:
     jz cmd_in
 
     # Read key.
-    mov $0x00, %ah
+    xor %ah, %ah
     int $0x16
 
     # Save character.
@@ -286,10 +270,8 @@ cmd_in:
 
 cmd_out:
     # Set cursor position.
-    mov $0x02, %ah
-    mov $0x00, %bh
     mov (MEMORY_OUT_CHAR), %dx
-    int $0x10
+    call set_cursor_pos
 
     incw (MEMORY_OUT_CHAR)
 
@@ -297,7 +279,6 @@ cmd_out:
     mov (MEMORY_CURRENT_POINTER), %bx
     mov (%bx), %al
     mov $0x0e, %ah
-    mov $0x00, %bh
     int $0x10
     jmp next
 
@@ -361,18 +342,24 @@ next:
     jg end
 
     # Check if it's last column, if yes, go to next row.
-    cmp $MAX_COL, %ah
+    cmp $0x50, %al
     je next_row
     jmp loop
 
 next_row:
-    mov $0x0, %ah
-    inc %al
+    xor %al, %al
+    inc %ah
     mov %ax, (MEMORY_CURRENT_CHAR)
     jmp loop
 
 end:
     jmp loop_wait
+
+set_cursor_pos:
+    mov $0x02, %ah
+    xor %bh, %bh
+    int $0x10
+    ret
 
 about: .asciz "bfloader   F5 Run   Ctrl+F5 Debug"
 
