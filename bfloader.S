@@ -63,9 +63,14 @@ restart_cont:
     mov $BF_SEPARATOR, %dx
     call set_cursor_pos
 
-    # Print output separator.
-    mov $0x09CD, %ax
+    # Clear output.
+    mov $0x0900, %ax
     mov $0x000F, %bx
+    mov $0x06FF, %cx
+    int $0x10
+
+    # Print output separator.
+    mov $0xCD, %al
     mov $0x0050, %cx
     int $0x10
 
