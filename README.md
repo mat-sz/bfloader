@@ -1,6 +1,10 @@
 # bfloader
 
-Boot sector Brainfuck interpreter, fits in 512 bytes.
+<p align="center">
+  <img src="https://raw.githubusercontent.com/mat-sz/bfloader/master/screenshot.png" alt="Screenshot">
+</p>
+
+Boot sector [Brainfuck](https://en.wikipedia.org/wiki/Brainfuck) interpreter, fits in 512 bytes.
 
 **This project is optimized for the resulting binary size, not performance.**
 
