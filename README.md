@@ -16,3 +16,10 @@ After running, type in your Brainfuck program using your keyboard (use arrow key
 The output will be shown in the lower half of your screen.
 
 To stop the execution hold <kbd>Ctrl</kbd> + <kbd>C</kbd>. While debugging press <kbd>F5</kbd> to continue the program from the current step until the end.
+
+## Limitations
+
+- Program length is limited to 16 lines of 80 columns each (1120 characters).
+- Each cell is 1 byte long. (256 different values, wrapping).
+- Program memory space starts at 0xF000. It is possible to overwrite memory segments that shouldn't be overwritten.
+- The editor isn't very advanced.
