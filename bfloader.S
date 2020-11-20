@@ -89,8 +89,8 @@ restart_cont:
 
 print_about:
     lodsb
-    cmp $0x00, %al
-    je restart_finish
+    test %al, %al
+    jz restart_finish
 
     int $0x10
     jmp print_about
@@ -176,15 +176,15 @@ move_next_line:
 
 move_up:
     call move_prepare
-    cmp $0x00, %dh
-    je keyboard
+    test %dh, %dh
+    jz keyboard
     dec %dh
     jmp move_finish
 
 move_left:
     call move_prepare
-    cmp $0x00, %dl
-    je keyboard
+    test %dl, %dl
+    jz keyboard
     dec %dl
     jmp move_finish
 
