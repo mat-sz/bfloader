@@ -141,11 +141,15 @@ keyboard:
 
     # Move cursor
     cmp $KEY_RIGHT, %ah
-    je move_right
+    je move_next
 
     # Print last character.
-    mov $0x0e, %ah
+    mov $0x09, %ah
+    mov $0x0007, %bx
+    mov $0x0001, %cx
     int $0x10
+
+    jmp move_next
 
     # Get more keys.
     jmp keyboard
@@ -155,6 +159,20 @@ move_prepare:
     mov $0x03, %ah
     int $0x16
     ret
+
+move_next:
+    call move_prepare
+    cmp $MAX_COL, %dl
+    je move_next_line
+    inc %dl
+    jmp move_finish
+
+move_next_line:
+    cmp $MAX_ROW, %dh
+    je keyboard
+    xor %dl, %dl
+    inc %dh
+    jmp move_finish
 
 move_up:
     call move_prepare
@@ -168,13 +186,6 @@ move_left:
     cmp $0x00, %dl
     je keyboard
     dec %dl
-    jmp move_finish
-
-move_right:
-    call move_prepare
-    cmp $MAX_COL, %dl
-    je keyboard
-    inc %dl
     jmp move_finish
 
 move_down:
