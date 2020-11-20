@@ -8,6 +8,8 @@ Boot sector [Brainfuck](https://en.wikipedia.org/wiki/Brainfuck) IDE and interpr
 
 **This project is optimized for the resulting binary size, not performance.**
 
+You can download prebuilt binaries [here](https://github.com/mat-sz/bfloader/releases).
+
 ## Running in QEMU
 
 ```
