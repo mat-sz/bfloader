@@ -267,6 +267,9 @@ cmd_in:
     # Read key.
     xor %ah, %ah
     int $0x16
+    
+    cmp $KEY_TERMINATE, %ax
+    je restart
 
     # Save character.
     mov (MEMORY_CURRENT_POINTER), %bx
