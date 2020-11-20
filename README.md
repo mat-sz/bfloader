@@ -1,7 +1,15 @@
 # bfloader
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/mat-sz/bfloader/master/screenshot.png" alt="Screenshot">
+  <a href="https://demo.matsz.dev/bfloader/">
+    <strong>Click here to open an online demo.</strong>
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://demo.matsz.dev/bfloader/">
+    <img src="https://raw.githubusercontent.com/mat-sz/bfloader/master/screenshot.png" alt="Screenshot">
+  </a>
 </p>
 
 Boot sector [Brainfuck](https://en.wikipedia.org/wiki/Brainfuck) IDE and interpreter, fits in 512 bytes.
