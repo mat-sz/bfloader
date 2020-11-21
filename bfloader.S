@@ -2,6 +2,8 @@
 #
 # Reserved registers:
 # BP = debug flag (Ctrl+F5)
+# DI = current pointer
+# SI = current char
 
 BF_INITIAL_POINTER = 0xF000
 BF_SEPARATOR = 0x1100
@@ -13,8 +15,6 @@ MAX_COL = 0x4F
 MAX_CHAR = 0x104F
 
 MEMORY_OFFSET = 0xFFD0
-MEMORY_CURRENT_POINTER = MEMORY_OFFSET
-MEMORY_CURRENT_CHAR = MEMORY_OFFSET + 4
 MEMORY_OUT_CHAR = MEMORY_OFFSET + 12
 MEMORY_STACK = MEMORY_OFFSET + 16
 
@@ -108,9 +108,9 @@ restart_finish:
 
     # Initialize
     xor %bp, %bp # BP = debug flag
-    movw $BF_INITIAL_POINTER, (MEMORY_CURRENT_POINTER)
+    movw $BF_INITIAL_POINTER, %di # DI = current pointer
     movw $BF_INITIAL_OUT, (MEMORY_OUT_CHAR)
-    mov %dx, (MEMORY_CURRENT_CHAR)
+    xor %si, %si # SI = current char
     mov %sp, (MEMORY_STACK)
 
     jmp keyboard
@@ -254,7 +254,7 @@ loop_should_terminate:
 
 step:
     # Set cursor position.
-    mov (MEMORY_CURRENT_CHAR), %dx
+    mov %si, %dx # SI = current char
     call set_cursor_pos
 
     # Read character. (to %al)
@@ -297,7 +297,7 @@ cmd_in:
     je restart
 
     # Save character.
-    mov (MEMORY_CURRENT_POINTER), %bx
+    mov %di, %bx # DI = current pointer
     mov %al, (%bx)
     jmp next
 
@@ -309,7 +309,7 @@ cmd_out:
     incw (MEMORY_OUT_CHAR)
 
     # Print last character.
-    mov (MEMORY_CURRENT_POINTER), %bx
+    mov %di, %bx # DI = current pointer
     mov (%bx), %al
     mov $0x0e, %ah
     int $0x10
@@ -317,7 +317,7 @@ cmd_out:
 
 cmd_loop_start:
     # Push cursor position to stack.
-    pushw (MEMORY_CURRENT_CHAR)
+    push %si # SI = current char
     jmp next
 
 cmd_loop_end:
@@ -326,49 +326,47 @@ cmd_loop_end:
     je next
 
     # Copy stack value to %ax.
-    popw %ax
-    pushw %ax
+    pop %ax
+    push %ax
 
     # Go back to loop start if current value is not equal to 0.
-    mov (MEMORY_CURRENT_POINTER), %bx
+    mov %di, %bx # DI = current pointer
     cmpb $0x00, (%bx)
     jnz cmd_loop_end_back
 
     # Remove loop from stack otherwise.
-    popw %ax
+    pop %ax
     jmp next
 
 cmd_loop_end_back:
     # Go back to loop start.
-    movw %ax, (MEMORY_CURRENT_CHAR)
+    mov %ax, %si # SI = current char
     jmp next
 
 cmd_pointer_left:
     # Switch current pointer to left.
-    decw (MEMORY_CURRENT_POINTER)
+    dec %di # DI = current pointer
     jmp next
 
 cmd_pointer_right:
     # Switch current pointer to right.
-    incw (MEMORY_CURRENT_POINTER)
+    inc %di # DI = current pointer
     jmp next
     
 cmd_inc:
     # Increment value of current pointer.
-    mov (MEMORY_CURRENT_POINTER), %bx
-    incb (%bx)
+    incb (%di) # DI = current pointer
     jmp next
 
 cmd_dec:
     # Decrement value of current pointer.
-    mov (MEMORY_CURRENT_POINTER), %bx
-    decb (%bx)
+    decb (%di) # DI = current pointer
     jmp next
 
 next:
     # Increment value of current character.
-    incw (MEMORY_CURRENT_CHAR)
-    mov (MEMORY_CURRENT_CHAR), %ax
+    inc %si # SI = current char
+    mov %si, %ax # SI = current char
 
     # Check if it's past the last character (if it is, end program).
     cmpw $MAX_CHAR, %ax
@@ -382,7 +380,7 @@ next:
 next_row:
     xor %al, %al
     inc %ah
-    mov %ax, (MEMORY_CURRENT_CHAR)
+    mov %ax, %si # SI = current char
     jmp loop
 
 end:
