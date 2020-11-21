@@ -27,6 +27,8 @@ KEY_DOWN = 0x50
 KEY_LEFT = 0x4B
 KEY_RIGHT = 0x4D
 KEY_BACKSPACE = 0x08
+KEY_HOME = 0x47
+KEY_END = 0x4F
 
 CHAR_POINTER_RIGHT = 0x3E # >
 CHAR_POINTER_LEFT = 0x3C  # <
@@ -114,6 +116,10 @@ restart_finish:
     jmp keyboard
 
 keyboard:
+    # Read cursor position.
+    mov $0x03, %ah
+    int $0x16
+
     xor %ah, %ah
     int $0x16
 
@@ -124,6 +130,14 @@ keyboard:
     # Start debugging if KEY_DEBUG is pressed.
     cmp $KEY_DEBUG, %ax
     je debug
+
+    # Move cursor
+    cmp $KEY_HOME, %ah
+    je move_first
+
+    # Move cursor
+    cmp $KEY_END, %ah
+    je move_last
 
     # Move cursor
     cmp $KEY_UP, %ah
@@ -156,14 +170,15 @@ keyboard:
     # Get more keys.
     jmp keyboard
 
-move_prepare:
-    # Read cursor position.
-    mov $0x03, %ah
-    int $0x16
-    ret
+move_first:
+    xor %dl, %dl
+    jmp move_finish
+
+move_last:
+    mov $MAX_COL, %dl
+    jmp move_finish
 
 move_next:
-    call move_prepare
     cmp $MAX_COL, %dl
     je move_next_line
     inc %dl
@@ -177,7 +192,6 @@ move_next_line:
     jmp move_finish
 
 move_prev:
-    call move_prepare
     test %dl, %dl
     jz move_prev_line
     dec %dl
@@ -191,14 +205,12 @@ move_prev_line:
     jmp move_finish
 
 move_up:
-    call move_prepare
     test %dh, %dh
     jz keyboard
     dec %dh
     jmp move_finish
 
 move_down:
-    call move_prepare
     cmp $MAX_ROW, %dh
     je keyboard
     inc %dh
