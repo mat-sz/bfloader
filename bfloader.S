@@ -24,6 +24,7 @@ KEY_UP = 0x48
 KEY_DOWN = 0x50
 KEY_LEFT = 0x4B
 KEY_RIGHT = 0x4D
+KEY_BACKSPACE = 0x08
 
 CHAR_POINTER_RIGHT = 0x3E # >
 CHAR_POINTER_LEFT = 0x3C  # <
@@ -142,6 +143,10 @@ keyboard:
     # Move cursor
     cmp $KEY_RIGHT, %ah
     je move_next
+
+    # Handle backspace
+    cmp $KEY_BACKSPACE, %al
+    je move_left
 
     # Print last character.
     mov $0x09, %ah
