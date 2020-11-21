@@ -1,4 +1,7 @@
 # bfloader - Brainfuck made to fit in 512 bytes.
+#
+# Reserved registers:
+# BP = debug flag (Ctrl+F5)
 
 BF_INITIAL_POINTER = 0xF000
 BF_SEPARATOR = 0x1100
@@ -14,7 +17,6 @@ MEMORY_CURRENT_POINTER = MEMORY_OFFSET
 MEMORY_CURRENT_CHAR = MEMORY_OFFSET + 4
 MEMORY_OUT_CHAR = MEMORY_OFFSET + 12
 MEMORY_STACK = MEMORY_OFFSET + 16
-MEMORY_FLAG_DEBUG = MEMORY_OFFSET + 20
 
 KEY_EXECUTE = 0x3F00   # F5
 KEY_DEBUG = 0x6200     # Ctrl+F5
@@ -46,15 +48,6 @@ init:
     int $0x10
 
 restart:
-    mov $0xF000, %bx
-
-clear_memory:
-    movb $0x00, (%bx)
-    inc %bx
-    cmp $0xF0FF, %bx
-    jne clear_memory
-
-restart_cont:
     # Set cursor shape. (Insert style)
     mov $0x01, %ah
     mov $0x000f, %cx
@@ -75,6 +68,16 @@ restart_cont:
     mov $0x0050, %cx
     int $0x10
 
+    # Clear memory.
+    mov $BF_INITIAL_POINTER, %bx
+
+clear_memory:
+    movb %ch, (%bx)
+    inc %bx
+    cmp $0xF0FF, %bx
+    jne clear_memory
+
+restart_cont:
     # Set cursor position.
     mov $BF_ABOUT, %dx
     call set_cursor_pos
@@ -102,21 +105,15 @@ restart_finish:
     call set_cursor_pos
 
     # Initialize
-    movb $0x00, (MEMORY_FLAG_DEBUG)
+    xor %bp, %bp # BP = debug flag
     movw $BF_INITIAL_POINTER, (MEMORY_CURRENT_POINTER)
     movw $BF_INITIAL_OUT, (MEMORY_OUT_CHAR)
-    movw $0x0000, (MEMORY_CURRENT_CHAR)
+    mov %dx, (MEMORY_CURRENT_CHAR)
     mov %sp, (MEMORY_STACK)
 
     jmp keyboard
 
 keyboard:
-    # Get pressed key.
-    mov $0x01, %ah
-    int $0x16
-
-    # Loop again if no key is pressed.
-    jz keyboard
     xor %ah, %ah
     int $0x16
 
@@ -205,7 +202,7 @@ move_finish:
     jmp keyboard
 
 debug:
-    movb $0x01, (MEMORY_FLAG_DEBUG)
+    inc %bp # BP = debug flag
 
 execute:
     # Set cursor shape. (Default)
@@ -214,8 +211,8 @@ execute:
     int $0x10
 
 loop:
-    cmpb $0x00, (MEMORY_FLAG_DEBUG)
-    jne loop_wait
+    test %bp, %bp # BP = debug flag
+    jnz loop_wait
 
     # Get pressed key.
     mov $0x01, %ah
@@ -234,7 +231,7 @@ loop_should_terminate:
     
     cmp $KEY_EXECUTE, %ax
     jne step
-    movb $0x00, (MEMORY_FLAG_DEBUG)
+    xor %bp, %bp # BP = debug flag
 
 step:
     # Set cursor position.
@@ -273,13 +270,6 @@ step:
     jmp next
 
 cmd_in:
-    # Get pressed key.
-    mov $0x01, %ah
-    int $0x16
-
-    # Loop again if no key is pressed.
-    jz cmd_in
-
     # Read key.
     xor %ah, %ah
     int $0x16
