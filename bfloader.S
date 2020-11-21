@@ -135,15 +135,15 @@ keyboard:
 
     # Move cursor
     cmp $KEY_LEFT, %ah
-    je move_left
+    je move_prev
+
+    # Handle backspace
+    cmp $KEY_BACKSPACE, %al
+    je move_prev
 
     # Move cursor
     cmp $KEY_RIGHT, %ah
     je move_next
-
-    # Handle backspace
-    cmp $KEY_BACKSPACE, %al
-    je move_left
 
     # Print last character.
     mov $0x09, %ah
@@ -176,18 +176,25 @@ move_next_line:
     inc %dh
     jmp move_finish
 
+move_prev:
+    call move_prepare
+    test %dl, %dl
+    jz move_prev_line
+    dec %dl
+    jmp move_finish
+
+move_prev_line:
+    test %dh, %dh
+    jz keyboard
+    mov $MAX_COL, %dl
+    dec %dh
+    jmp move_finish
+
 move_up:
     call move_prepare
     test %dh, %dh
     jz keyboard
     dec %dh
-    jmp move_finish
-
-move_left:
-    call move_prepare
-    test %dl, %dl
-    jz keyboard
-    dec %dl
     jmp move_finish
 
 move_down:
