@@ -311,7 +311,7 @@ cmd_out:
     mov $0x0e, %ah
     int $0x10
 
-    cmp $MAX_OUT_CHAR, (MEMORY_OUT_CHAR)
+    cmpw $MAX_OUT_CHAR, (MEMORY_OUT_CHAR)
     je reset_out_char
 
     incw (MEMORY_OUT_CHAR)
@@ -319,7 +319,7 @@ cmd_out:
     jmp next
 
 reset_out_char:
-    mov $BF_INITIAL_OUT, (MEMORY_OUT_CHAR)
+    movw $BF_INITIAL_OUT, (MEMORY_OUT_CHAR)
     mov (MEMORY_OUT_CHAR), %dx
     call set_cursor_pos
 
