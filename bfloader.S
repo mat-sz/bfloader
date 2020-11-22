@@ -324,7 +324,7 @@ cmd_loop_end:
 
     # Go back to loop start if current value is not equal to 0.
     mov (%di), %bx # DI = current pointer
-    test %bh, %bh
+    test %bl, %bl
     jnz cmd_loop_end_back
 
     # Remove loop from stack otherwise.
