@@ -6,13 +6,14 @@
 # SI = current char
 
 BF_INITIAL_POINTER = 0xF000
-BF_SEPARATOR = 0x1100
-BF_INITIAL_OUT = 0x1200
+BF_SEPARATOR = 0x1600
+BF_INITIAL_OUT = 0x1700
 BF_ABOUT = 0x1800
 
-MAX_ROW = 0x10
+MAX_ROW = 0x15
 MAX_COL = 0x4F
-MAX_CHAR = 0x104F
+MAX_CHAR = 0x154F
+MAX_OUT_CHAR = 0x174F
 
 MEMORY_OFFSET = 0xFFD0
 MEMORY_OUT_CHAR = MEMORY_OFFSET + 12
@@ -304,12 +305,23 @@ cmd_out:
     mov (MEMORY_OUT_CHAR), %dx
     call set_cursor_pos
 
-    incw (MEMORY_OUT_CHAR)
-
     # Print last character.
     mov (%di), %al
     mov $0x0e, %ah
     int $0x10
+
+    cmp $MAX_OUT_CHAR, (MEMORY_OUT_CHAR)
+    je reset_out_char
+
+    incw (MEMORY_OUT_CHAR)
+
+    jmp next
+
+reset_out_char:
+    mov $BF_INITIAL_OUT, (MEMORY_OUT_CHAR)
+    mov (MEMORY_OUT_CHAR), %dx
+    call set_cursor_pos
+
     jmp next
 
 cmd_loop_start:

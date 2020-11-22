@@ -33,8 +33,8 @@ To stop the execution hold <kbd>Ctrl</kbd> + <kbd>C</kbd>. While debugging press
 
 ## Limitations
 
-- Program length is limited to 16 lines of 80 columns each (1120 characters).
+- Program length is limited to 21 lines of 80 columns each (1680 characters).
 - Each cell is 1 byte long. (256 different values, wrapping).
 - Program memory space starts at 0xF000. It is possible to overwrite memory segments that shouldn't be overwritten.
-- Program's output is limited to 6 lines of 80 columns each (480 characters).
+- Program's output is limited to 1 line of 80 columns (80 characters).
 - The editor isn't very advanced.
