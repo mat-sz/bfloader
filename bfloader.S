@@ -16,7 +16,6 @@ MAX_CHAR = 0x104F
 
 MEMORY_OFFSET = 0xFFD0
 MEMORY_OUT_CHAR = MEMORY_OFFSET + 12
-MEMORY_STACK = MEMORY_OFFSET + 16
 
 KEY_EXECUTE = 0x3F00   # F5
 KEY_DEBUG = 0x6200     # Ctrl+F5
@@ -111,7 +110,7 @@ restart_finish:
     movw $BF_INITIAL_POINTER, %di # DI = current pointer
     movw $BF_INITIAL_OUT, (MEMORY_OUT_CHAR)
     xor %si, %si # SI = current char
-    mov %sp, (MEMORY_STACK)
+    push $-1
 
     jmp keyboard
 
@@ -297,8 +296,7 @@ cmd_in:
     je restart
 
     # Save character.
-    mov %di, %bx # DI = current pointer
-    mov %al, (%bx)
+    mov %al, (%di) # DI = current pointer
     jmp next
 
 cmd_out:
@@ -309,8 +307,7 @@ cmd_out:
     incw (MEMORY_OUT_CHAR)
 
     # Print last character.
-    mov %di, %bx # DI = current pointer
-    mov (%bx), %al
+    mov (%di), %al
     mov $0x0e, %ah
     int $0x10
     jmp next
@@ -321,17 +318,13 @@ cmd_loop_start:
     jmp next
 
 cmd_loop_end:
-    # Go to next if nothing on stack.
-    cmp (MEMORY_STACK), %sp
-    je next
-
     # Copy stack value to %ax.
     pop %ax
     push %ax
 
     # Go back to loop start if current value is not equal to 0.
-    mov %di, %bx # DI = current pointer
-    cmpb $0x00, (%bx)
+    mov (%di), %bx # DI = current pointer
+    test %bh, %bh
     jnz cmd_loop_end_back
 
     # Remove loop from stack otherwise.
@@ -361,7 +354,6 @@ cmd_inc:
 cmd_dec:
     # Decrement value of current pointer.
     decb (%di) # DI = current pointer
-    jmp next
 
 next:
     # Increment value of current character.
