@@ -118,6 +118,9 @@ restart_finish:
     jmp keyboard
 
 keyboard:
+    cmp $KEY_BACKSPACE, %al
+    call clear_char
+
     # Read cursor position.
     mov $0x03, %ah
     int $0x16
@@ -175,6 +178,13 @@ keyboard:
 
     # Get more keys.
     jmp keyboard
+
+clear_char:
+    mov $0x0900, %ax
+    mov $0x0007, %bx
+    mov $0x0001, %cx
+    int $0x10
+    ret
 
 move_first:
     xor %dl, %dl
