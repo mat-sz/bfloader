@@ -30,6 +30,7 @@ KEY_RIGHT = 0x4D
 KEY_BACKSPACE = 0x08
 KEY_HOME = 0x47
 KEY_END = 0x4F
+KEY_ENTER = 0x0D
 
 CHAR_POINTER_RIGHT = 0x3E # >
 CHAR_POINTER_LEFT = 0x3C  # <
@@ -159,6 +160,10 @@ keyboard:
     # Move cursor
     cmp $KEY_RIGHT, %ah
     je move_next
+
+    # Handle Enter
+    cmp $KEY_ENTER, %al
+    je move_next_line
 
     # Print last character.
     mov $0x09, %ah
