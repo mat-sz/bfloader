@@ -119,7 +119,7 @@ restart_finish:
 
 keyboard:
     cmp $KEY_BACKSPACE, %al
-    call clear_char
+    je clear_char
 
     # Read cursor position.
     mov $0x03, %ah
@@ -184,7 +184,7 @@ clear_char:
     mov $0x0007, %bx
     mov $0x0001, %cx
     int $0x10
-    ret
+    jmp keyboard
 
 move_first:
     xor %dl, %dl
