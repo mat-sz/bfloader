@@ -31,6 +31,8 @@ The output will be shown in between the separator and the blue line.
 
 To stop the execution or to reset after completed execution hold <kbd>Ctrl</kbd> + <kbd>C</kbd>. While debugging press <kbd>F5</kbd> to continue the program from the current step until the end.
 
+To reset the state (remove the code from memory) and start from scratch, press <kbd>Ctrl</kbd> + <kbd>F12</kbd>.
+
 ## Limitations
 
 - Program length is limited to 21 lines of 80 columns each (1680 characters).

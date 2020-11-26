@@ -22,6 +22,7 @@ MEMORY_OUT_CHAR = MEMORY_OFFSET
 KEY_EXECUTE = 0x3F00   # F5
 KEY_DEBUG = 0x6200     # Ctrl+F5
 KEY_TERMINATE = 0x2E03 # Ctrl+C
+KEY_RESET = 0x8A00     # Ctrl+F12
 
 KEY_UP = 0x48
 KEY_DOWN = 0x50
@@ -167,6 +168,8 @@ keyboard:
     # Handle Enter
     cmp $KEY_ENTER, %al
     je move_next_line
+    
+    call check_keys
 
     # Print last character.
     mov $0x09, %ah
@@ -261,9 +264,8 @@ loop_wait:
 loop_should_terminate:
     int $0x16
     
-    cmp $KEY_TERMINATE, %ax
-    je restart
-    
+    call check_keys
+
     cmp $KEY_EXECUTE, %ax
     jne step
     xor %bp, %bp # BP = debug flag
@@ -309,8 +311,7 @@ cmd_in:
     xor %ah, %ah
     int $0x16
     
-    cmp $KEY_TERMINATE, %ax
-    je restart
+    call check_keys
 
     # Save character.
     mov %al, (%di) # DI = current pointer
@@ -411,6 +412,17 @@ set_cursor_pos:
     xor %bh, %bh
     int $0x10
     ret
+
+check_keys:
+    cmp $KEY_TERMINATE, %ax
+    je restart
+
+    # Handle reset
+    cmp $KEY_RESET, %al
+    je init
+
+    ret
+
 
 about: .asciz "bfloader   F5 Run   Ctrl+F5 Debug"
 
