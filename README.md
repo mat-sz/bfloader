@@ -1,13 +1,13 @@
 # bfloader
 
 <p align="center">
-  <a href="https://demo.matsz.dev/bfloader/">
+  <a href="https://demo.mat.dev/bfloader/">
     <strong>Click here to open an online demo.</strong>
   </a>
 </p>
 
 <p align="center">
-  <a href="https://demo.matsz.dev/bfloader/">
+  <a href="https://demo.mat.dev/bfloader/">
     <img src="https://raw.githubusercontent.com/mat-sz/bfloader/master/screenshot.png" alt="Screenshot">
   </a>
 </p>
